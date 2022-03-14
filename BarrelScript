@@ -1,0 +1,9 @@
+--SCRIPT UNDER THE BARREL
+
+local itemStoragePart = script.Parent
+--local itemStorageList = script.Parent.ItemList
+local itemStorageToPlayer_RemoteEvent = game:GetService("ReplicatedStorage").Storage.ItemStorageToPlayer
+
+script.Parent.ProximityPrompt.Triggered:Connect(function(playerWhoTriggered)
+	itemStorageToPlayer_RemoteEvent:FireClient(playerWhoTriggered,itemStoragePart)
+end)
