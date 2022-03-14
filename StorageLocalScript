@@ -1,0 +1,47 @@
+local player = game:GetService("Players").LocalPlayer
+local storageRoot = script.Parent
+local storageLocalToServer_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageLocalToServer
+local itemStorageToPlayer_RemoteEvent = game:GetService("ReplicatedStorage").Storage.ItemStorageToPlayer
+local itemListParentTo
+
+--LISTENING FOR IF THE PLAYER IS TRYING TO OPEN A STORAGE OBJECT 
+itemStorageToPlayer_RemoteEvent.OnClientEvent:Connect(function(itemStoragePart)	
+	--MOVES THE ITEM LIST FROM WHATEVER OBJECT (barrel, chest, etc) IS STORING IT TO THE PLAYER
+	if itemStoragePart:FindFirstChild("ItemStorageList") and not storageRoot.Storage:FindFirstChild("ItemStorageList") then
+		--make sure to move the itemList to the player
+		itemListParentTo = "player"
+		--yell at StorageServerScript to do something
+		storageLocalToServer_RemoteEvent:FireServer(itemStoragePart,itemListParentTo)
+	end
+end)
+
+
+	
+
+
+
+
+
+
+
+
+--OLD STUFF
+	--[[while storageRoot.Storage:FindFirstChild("ItemStorageList") do
+		wait(0.000000001)
+
+		if (itemStoragePart.Position - player.Character.PrimaryPart.Position).Magnitude > 15 and storageRoot.Storage:FindFirstChild("ItemStorageList") and not itemStoragePart:FindFirstChild("ItemStorageList") then
+			storageRoot.Visible = false
+
+			itemListParentTo = "originalPart"
+			storageLocalToServer_RemoteEvent:FireServer(itemStoragePart,itemListParentTo)
+			--storageRoot.Storage:FindFirstChild("ItemStorageList").Parent = itemStoragePart -- <----------
+		end
+	end
+	
+	wait(0.1)
+	
+	--if the player has the item storage list then make them see the gui
+	if storageRoot.Storage:FindFirstChild("ItemStorageList") then
+		storageRoot.Visible = true
+
+	else print("Error") end]]--
