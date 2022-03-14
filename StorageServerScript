@@ -1,0 +1,82 @@
+local storageLocalToServer_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageLocalToServer
+local storageInitalAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageInitalAmountChange
+local storageReleaseAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageReleaseAmountChange
+local storageBackupReleaseAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageBackupReleaseAmountChange
+local player = script.Parent.Parent.Parent.Parent.Parent
+local playerItemStorageList
+
+--CHANGES PARENT OF STORAGE ITEM LIST
+storageLocalToServer_RemoteEvent.OnServerEvent:Connect(function(remoteEventPlayer,itemStoragePart,itemListParentTo)
+	
+	local playerToStoragePartDistance = (itemStoragePart.Position - player.Character.PrimaryPart.Position).Magnitude
+	
+	
+
+	
+	--check if the player names match from the script
+	local itemStorageList = itemStoragePart:FindFirstChild("ItemStorageList")
+	if remoteEventPlayer == player then
+		--if the item storage list is under the barrel move it to be under the player
+		if itemStorageList and itemListParentTo == "player" then
+			itemStorageList.Parent = script.Parent.Parent.Storage
+			player.PlayerGui.InventoryGUI.StorageRoot.Visible = true
+			
+			playerItemStorageList = script.Parent.Parent.Storage:FindFirstChild("ItemStorageList")
+		end
+		--moves the item list to be back under the storage part (barrel)
+		--if the storageGUI (player) has the item list move it back under the original storage part
+		if playerItemStorageList and itemListParentTo == "originalPart" then
+			playerItemStorageList.Parent = itemStoragePart
+
+			player.PlayerGui.InventoryGUI.StorageRoot.Visible = false
+		end
+	end 
+	
+	player.PlayerGui.InventoryGUI.StorageRoot.TextButton.MouseButton1Down:Connect(function()
+		playerItemStorageList.Parent = itemStoragePart
+
+		player.PlayerGui.InventoryGUI.StorageRoot.Visible = false
+	end)
+	
+	while playerToStoragePartDistance < 15 do
+		wait(0.01)
+		playerToStoragePartDistance = (itemStoragePart.Position - player.Character.PrimaryPart.Position).Magnitude
+		if playerToStoragePartDistance > 15 then
+			playerItemStorageList.Parent = itemStoragePart
+
+			player.PlayerGui.InventoryGUI.StorageRoot.Visible = false
+			print("player too far!")
+		end
+	end
+end)
+
+
+
+
+
+
+
+
+
+
+storageInitalAmountChange_RemoteEvent.OnServerEvent:Connect(function(remoteEventPlayer,moveableItem,otherItem)
+	if remoteEventPlayer == player and tonumber(otherItem.ItemAmount.Text) > 0 then
+		otherItem.ItemAmount.Text = otherItem.ItemAmount.Text - 1
+		moveableItem.ItemAmount.Text = 1
+	end
+end)
+
+storageReleaseAmountChange_RemoteEvent.OnServerEvent:Connect(function(remoteEventPlayer,otherItem,moveableItem)
+	if remoteEventPlayer == player then
+		otherItem.ItemAmount.Text = otherItem.ItemAmount.Text + moveableItem.ItemAmount.Text
+		moveableItem.ItemAmount.Text = 0
+	end
+end)
+
+storageBackupReleaseAmountChange_RemoteEvent.OnServerEvent:Connect(function(remoteEventPlayer,otherItem,moveableItem)
+	if remoteEventPlayer == player then
+		otherItem.ItemAmount.Text = otherItem.ItemAmount.Text + moveableItem.ItemAmount.Text
+		moveableItem.ItemAmount.Text = 0
+	end
+end)
+
