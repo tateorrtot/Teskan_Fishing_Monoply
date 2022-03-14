@@ -1,0 +1,184 @@
+local inventoryGUI = script.Parent.Parent.Parent
+local moveableItem = script.Parent
+local backupReturnItem
+local mouseIn___
+local userinputservice = game:GetService("UserInputService")
+local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+local storageInitalAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageInitalAmountChange
+local storageReleaseAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageReleaseAmountChange
+local storageBackupReleaseAmountChange_RemoteEvent = game:GetService("ReplicatedStorage").Storage.StorageBackupReleaseAmountChange
+
+
+local backpack = inventoryGUI.BackpackRoot.Backpack
+local hotbar = inventoryGUI.Hotbar
+local storage = inventoryGUI.StorageRoot.Storage
+
+local backpackItem = backpack.ItemList:FindFirstChild(moveableItem.Name)
+local hotbarItem = hotbar.ItemList:FindFirstChild(moveableItem.Name)
+local storageItem = inventoryGUI.FakeButton
+
+local mouseInBackpack = false
+local mouseInHotbar = false
+local mouseInStorage = false
+
+local storageButtonIsPressed = false
+
+
+
+
+
+function AddItemStorageListFromPlayer()
+	if storage.ItemStorageList then
+		storageItem = storage.ItemStorageList:FindFirstChild(moveableItem.Name)
+		--print("Storage Child Added and Found")
+	end
+end
+storage.ChildAdded:Connect(AddItemStorageListFromPlayer)
+	
+function RemoveItemStorageListFromPlayer()
+	if not storage:FindFirstChild("ItemStorageList") then
+		storageItem = nil
+		print("Storage Child Removed")
+	end
+end
+storage.ChildRemoved:Connect(RemoveItemStorageListFromPlayer)
+
+
+function StorageItemPressed()
+	print(storageItem)
+
+	print("Button Pressed")
+end
+function StorageItemReleased()
+
+	print("Button Released")
+end
+storageItem.ImageButton.mouseButton1Down:Connect(StorageItemPressed)
+
+
+
+
+
+
+
+
+
+backpackItem.ImageButton.mouseButton1Down:Connect(function()
+	if tonumber(backpackItem.ItemAmount.Text) > 0 then
+		moveableItem.Position = UDim2.new(0,mouse.X,0,mouse.Y)
+		moveableItem.Visible = true
+		
+		backupReturnItem = "backpack"
+		
+		storageInitalAmountChange_RemoteEvent:FireServer(moveableItem,backpackItem)
+	end
+end)
+
+hotbarItem.ImageButton.mouseButton1Down:Connect(function()
+	if tonumber(hotbarItem.ItemAmount.Text) > 0 then
+		print("HOTBAR")
+		moveableItem.Position = UDim2.new(0,mouse.X,0,mouse.Y)
+		moveableItem.Visible = true
+
+		backupReturnItem = "hotbar"
+
+		storageInitalAmountChange_RemoteEvent:FireServer(moveableItem,hotbarItem)
+	end
+end)
+
+--[[userinputservice.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and storageItem and tonumber(storageItem.ItemAmount.Text) > 0 then
+		
+		print("INPUT!")
+		
+
+		storageItem.ImageButton.mouseButton1Down:Connect(function()
+				print("STORAGE ITEM")
+				moveableItem.Position = UDim2.new(0,mouse.X,0,mouse.Y)
+				moveableItem.Visible = true
+
+				backupReturnItem = "storage"
+
+				storageInitalAmountChange_RemoteEvent:FireServer(moveableItem,storageItem)
+		end)
+	end
+end)]]--
+
+mouse.Move:Connect(function()
+	if moveableItem.Visible == true then
+		moveableItem.Position = UDim2.new(0,mouse.X,0,mouse.Y)
+	end
+	
+	backpack.MouseEnter:Connect(function()
+		mouseInBackpack = true
+	end)
+	backpack.MouseLeave:Connect(function()
+		mouseInBackpack = false
+	end)
+	
+	hotbar.MouseEnter:Connect(function()
+		mouseInHotbar = true
+	end)
+	hotbar.MouseLeave:Connect(function()
+		mouseInHotbar = false
+	end)
+	
+	storage.MouseEnter:Connect(function()
+		mouseInStorage = true
+	end)
+	storage.MouseLeave:Connect(function()
+		mouseInStorage = false
+	end)
+end)
+
+userinputservice.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if mouseInBackpack == true then
+			moveableItem.Visible = false
+			storageReleaseAmountChange_RemoteEvent:FireServer(backpackItem,moveableItem)
+		else if mouseInHotbar == true then
+			moveableItem.Visible = false
+			storageReleaseAmountChange_RemoteEvent:FireServer(hotbarItem,moveableItem)
+		else if mouseInStorage == true then --MIGHT HAVE TO REMOTE EVENT THIS
+			moveableItem.Visible = false
+			--storageReleaseAmountChange_RemoteEvent:FireServer(storageItem,moveableItem)
+		else
+			if backupReturnItem == "backpack" then
+				storageBackupReleaseAmountChange_RemoteEvent:FireServer(backpackItem,moveableItem)
+				moveableItem.Visible = false
+			end
+			
+			if backupReturnItem == "hotbar" then
+				storageBackupReleaseAmountChange_RemoteEvent:FireServer(hotbarItem,moveableItem)
+				moveableItem.Visible = false
+			end
+			
+			if backupReturnItem == "storage" then
+				storageBackupReleaseAmountChange_RemoteEvent:FireServer(storageItem,moveableItem)
+				moveableItem.Visible = false
+			end
+		end
+		end
+		end
+	end
+end)
+
+
+--[[storage.ChildRemoved:Connect(function()
+	if not storage:FindFirstChild("ItemStorageList") then
+		storageItem = nil
+	end
+end)
+
+storage.ChildAdded:Connect(function()
+	if storage:FindFirstChild("ItemStorageList") and storageItem == nil then
+		storageItem = storage:FindFirstChild("ItemStorageList"):FindFirstChild(moveableItem.Name)
+	end
+end)
+
+
+if storageItem and input.UserInputType == Enum.UserInputType.MouseButton1 then
+	storageItem.ImageButton.mouseButton1Down:Connect(function()
+		print("WWWWWWWW")
+end)
+end	]]--
